@@ -109,7 +109,7 @@ A word is a 3-element list:
         ((not (boundp variable))
          (error "No such variable: %S" variable))
         (t
-         (elforth-push (symbol-value variable)))))
+         (symbol-value variable))))
 
 (defun elforth-store (variable value)
   (if (elforth-only-variable-p variable)
