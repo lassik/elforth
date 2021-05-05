@@ -55,6 +55,14 @@ A word is a 3-element list:
                      (insert " " (funcall repr item)))
                    (buffer-string)))))))
 
+(defun elforth-show-variables (interactive-p)
+  "Show the contents of the ElForth variables a..z in the echo area."
+  (interactive (list t))
+  (elforth--show-list interactive-p elforth-variables
+                      (lambda (pair)
+                        (let ((variable (car pair)) (value (cdr pair)))
+                          (format "%S=%S" variable value)))))
+
 (defun elforth-show-stack (interactive-p)
   "Show the contents of the ElForth stack in the echo area."
   (interactive (list t))
