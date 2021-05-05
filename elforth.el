@@ -106,7 +106,8 @@ A word is a 3-element list:
 (defun elforth-store (variable value)
   (if (elforth-only-variable-p variable)
       (setq elforth-variables
-            (elforth--alist-upsert elforth-variables variable value))
+            (sort (elforth--alist-upsert elforth-variables variable value)
+                  (lambda (a b) (string< (car a) (car b)))))
     (setf (symbol-value variable) value))
   value)
 
