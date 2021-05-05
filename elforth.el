@@ -27,13 +27,13 @@
 (require 'cl-lib)
 
 (defvar elforth-read-expression-history '()
-  "History of ElForth expressions read from the minibuffer.")
+  "History of El Forth expressions read from the minibuffer.")
 
 (defvar elforth-stack '()
-  "Holds the ElForth data stack. First value is top of stack.")
+  "Holds the El Forth data stack. First value is top of stack.")
 
 (defvar elforth-dictionary '()
-  "Holds the definitions of ElForth words.
+  "Holds the definitions of El Forth words.
 
 A word is a 3-element list:
 - a lambda taking iargs and returning a list of oargs.
@@ -41,7 +41,7 @@ A word is a 3-element list:
 - list of oarg names as symbols")
 
 (defvar elforth-variables '()
-  "Values of the one-letter variables a..z for ElForth.")
+  "Values of the one-letter variables a..z for El Forth.")
 
 (defun elforth--show-list (interactive-p list repr)
   (prog1 list
@@ -56,7 +56,7 @@ A word is a 3-element list:
                    (buffer-string)))))))
 
 (defun elforth-show-variables (interactive-p)
-  "Show the contents of the ElForth variables a..z in the echo area."
+  "Show the contents of the El Forth variables a..z in the echo area."
   (interactive (list t))
   (elforth--show-list interactive-p elforth-variables
                       (lambda (pair)
@@ -64,7 +64,7 @@ A word is a 3-element list:
                           (format "%S=%S" variable value)))))
 
 (defun elforth-show-stack (interactive-p)
-  "Show the contents of the ElForth stack in the echo area."
+  "Show the contents of the El Forth stack in the echo area."
   (interactive (list t))
   (elforth--show-list interactive-p (reverse elforth-stack)
                       (lambda (obj) (format "%S" obj))))
@@ -229,7 +229,7 @@ A word is a 3-element list:
 (define-elforth-word unlist (list --) (elforth-push-many list))
 
 (defun elforth-read-from-string (string)
-  "Read list of ElForth words from STRING."
+  "Read list of El Forth words from STRING."
   (with-temp-buffer
     (insert string)
     (goto-char (point-min))
@@ -238,7 +238,7 @@ A word is a 3-element list:
         (end-of-file (nreverse words))))))
 
 (defun elforth-read-expression (prompt)
-  "Read list of ElForth words from the minibuffer using PROMPT."
+  "Read list of El Forth words from the minibuffer using PROMPT."
   (let ((minibuffer-completing-symbol t))
     (minibuffer-with-setup-hook
         (lambda ()
@@ -252,8 +252,8 @@ A word is a 3-element list:
 
 ;;;###autoload
 (defun elforth-eval-expression (list)
-  "Evaluate LIST as ElForth words."
-  (interactive (list (elforth-read-expression "ElForth eval: ")))
+  "Evaluate LIST as El Forth words."
+  (interactive (list (elforth-read-expression "El Forth eval: ")))
   (dolist (word list)
     (cond ((and (consp word)
                 (= 2 (length word))
@@ -268,13 +268,13 @@ A word is a 3-element list:
            (elforth-push word)))))
 
 (defun elforth-eval-string (string)
-  "Read STRING as ElForth code and evaluate it."
+  "Read STRING as El Forth code and evaluate it."
   (elforth-eval-expression (elforth-read-from-string string))
   (elforth-show-stack (called-interactively-p 'interactive)))
 
 ;;;###autoload
 (defun elforth-eval-region (start end)
-  "Read text between START and END as ElForth code and evaluate it."
+  "Read text between START and END as El Forth code and evaluate it."
   (interactive "r")
   (elforth-eval-string (buffer-substring-no-properties start end))
   (elforth-show-stack (called-interactively-p 'interactive)))
