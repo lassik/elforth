@@ -274,16 +274,8 @@ the same name as a function without breaking the function."
 
 (defun elforth-read-expression (prompt)
   "Read list of El Forth words from the minibuffer using PROMPT."
-  (let ((minibuffer-completing-symbol t))
-    (minibuffer-with-setup-hook
-        (lambda ()
-          (add-hook 'completion-at-point-functions
-                    #'elisp-completion-at-point nil t)
-          (run-hooks 'eval-expression-minibuffer-setup-hook))
-      (read-from-minibuffer prompt nil
-                            read-expression-map
-                            'elforth-read-from-string
-                            'read-expression-history))))
+  (elforth-read-from-string
+   (read-string prompt nil 'elforth-read-expression-history "")))
 
 ;;;###autoload
 (defun elforth-eval-expression (list)
