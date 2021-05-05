@@ -44,6 +44,7 @@ A word is a 3-element list:
   "Values of the one-letter variables a..z for El Forth.")
 
 (defun elforth--show-list (interactive-p list repr)
+  "Internal fuction to help show LIST using REPR when INTERACTIVE-P."
   (prog1 list
     (when interactive-p
       (message "%s"
@@ -56,7 +57,9 @@ A word is a 3-element list:
                    (buffer-string)))))))
 
 (defun elforth-show-variables (interactive-p)
-  "Show the contents of the El Forth variables a..z in the echo area."
+  "Show the contents of the El Forth variables a..z in the echo area.
+
+INTERACTIVE-P is non-nil when called interactively."
   (interactive (list t))
   (elforth--show-list interactive-p elforth--variables
                       (lambda (pair)
@@ -64,23 +67,29 @@ A word is a 3-element list:
                           (format "%S=%S" variable value)))))
 
 (defun elforth-show-stack (interactive-p)
-  "Show the contents of the El Forth stack in the echo area."
+  "Show the contents of the El Forth stack in the echo area.
+
+INTERACTIVE-P is non-nil when called interactively."
   (interactive (list t))
   (elforth--show-list interactive-p (reverse elforth--stack)
                       (lambda (obj) (format "%S" obj))))
 
 (defun elforth-clear-stack ()
+  "Clear the El Forth stack."
   (interactive)
   (setq elforth--stack '())
   (elforth-show-stack (called-interactively-p 'interactive)))
 
 (defun elforth-push (value)
+  "Push VALUE to the El Forth stack."
   (setq elforth--stack (cons value elforth--stack)))
 
 (defun elforth-push-many (values)
+  "Push zero or more VALUES (in left to right order) to the El Forth stack."
   (setq elforth--stack (append (reverse values) elforth--stack)))
 
 (defun elforth-pop-many (n)
+  "Pop N values from the El Forth stack or signal an error."
   (let ((n (max 0 n)))
     (cond ((> n (length elforth--stack))
            (error "The stack does not have %d values" n))
@@ -90,17 +99,23 @@ A word is a 3-element list:
              values)))))
 
 (defun elforth--alist-upsert (alist name value)
+  "Internal function to update or insert NAME and VALUE in ALIST."
   (cons (cons name value)
         (cl-remove-if (lambda (entry) (eq name (car entry)))
                       alist)))
 
 (defun elforth-only-variable-p (variable)
+  "Return t if VARIABLE is one of the Forth-only variables a..z."
   (and (symbolp variable)
        (let ((name (symbol-name variable)))
          (and (= 1 (length name))
               (<= ?a (elt name 0) ?z)))))
 
 (defun elforth-fetch (variable)
+  "Return the value of VARIABLE.
+
+If VARIABLE is one of the one-letter Forth-only variables a..z,
+use it.  Otherwise use the Emacs Lisp variable with the name."
   (cond ((not (symbolp variable))
          (error "Trying to fetch non-symbol: %S" variable))
         ((elforth-only-variable-p variable)
@@ -112,6 +127,13 @@ A word is a 3-element list:
          (symbol-value variable))))
 
 (defun elforth-store (variable value)
+  "Set VARIABLE to VALUE.
+
+If VARIABLE is one of the one-letter Forth-only variables a..z,
+set it.  Otherwise set the global binding of the Emacs Lisp
+variable with the name.  Note that Emacs Lisp keeps variables and
+functions in separate namespaces, so you can set a variable with
+the same name as a function without breaking the function."
   (if (elforth-only-variable-p variable)
       (setq elforth--variables
             (sort (elforth--alist-upsert elforth--variables variable value)
@@ -120,6 +142,7 @@ A word is a 3-element list:
   value)
 
 (defun elforth--resolve-function (func)
+  "Internal function to validate FUNC and resolve into a normal form."
   (or (and (symbolp func)
            (cdr (assq func elforth--dictionary)))
       (and (functionp func)
@@ -134,6 +157,7 @@ A word is a 3-element list:
       (error "No such function: %S" func)))
 
 (defun elforth--rfunc-min-args (func)
+  "Internal function to get info about resolved FUNC."
   (if (functionp func)
       (let* ((arity (func-arity func))
              (min-args (car arity))
@@ -145,17 +169,20 @@ A word is a 3-element list:
       (length iargs))))
 
 (defun elforth--rfunc-too-many-args-p (func n)
+  "Internal function to check whether resolved FUNC can take N args."
   (if (functionp func)
       (let ((max-args (cdr (func-arity func))))
         (and (integerp max-args) (> n max-args)))))
 
 (defun elforth--rfunc-apply (func args)
+  "Internal function to apply resolved FUNC to ARGS."
   (if (functionp func)
       (list (apply func args))
     (let ((lam (elt func 0)))
       (apply lam args))))
 
 (defun elforth-apply (func args)
+  "Call the El Forth or Emacs Lisp function FUNC with ARGS."
   (let ((func (elforth--resolve-function func))
         (n (length args)))
     (cond ((< n (elforth--rfunc-min-args func))
@@ -166,17 +193,20 @@ A word is a 3-element list:
            (elforth-push-many (elforth--rfunc-apply func args))))))
 
 (defun elforth-execute (func)
+  "Call the El Forth or Emacs Lisp function FUNC with args from stack."
   (let* ((func (elforth--resolve-function func))
          (args (elforth-pop-many (elforth--rfunc-min-args func))))
     (elforth-push-many (elforth--rfunc-apply func args))))
 
 (defun elforth--define (name definition)
+  "Internal function to set NAME to DEFINITION in the dictionary."
   (cl-assert (symbolp name))
   (setq elforth--dictionary
         (elforth--alist-upsert elforth--dictionary name definition))
   name)
 
 (defmacro define-elforth-word (name stack-effect &rest body)
+  "Define the El Forth word NAME according to STACK-EFFECT and BODY."
   (let ((iargs '())
         (oargs '()))
     (let ((tail stack-effect) (had-dashes-p nil))
