@@ -292,7 +292,8 @@ the same name as a function without breaking the function."
           ((and (symbolp word) (not (elforth-only-variable-p word)))
            (elforth-execute word))
           (t
-           (elforth-push word)))))
+           (elforth-push word))))
+  (elforth-show-stack (called-interactively-p 'interactive)))
 
 (defun elforth-eval-string (string)
   "Read STRING as El Forth code and evaluate it."
