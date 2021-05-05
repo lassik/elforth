@@ -1,25 +1,27 @@
 ;;; elforth.el --- Do you have what it takes to hack Emacs Lisp in Forth? -*- lexical-binding: t -*-
-;;
+
+;; Copyright 2021 Lassi Kortela
 ;; SPDX-License-Identifier: ISC
+
 ;; Author: Lassi Kortela <lassi@lassi.io>
 ;; URL: https://github.com/lassik/elforth
 ;; Package-Requires: ((emacs "26.1"))
 ;; Version: 0.1.0
 ;; Keywords: games
-;;
+
 ;; This file is not part of GNU Emacs.
-;;
+
 ;;; Commentary:
-;;
+
 ;; It's well established that Real Programmers use Emacs, and equally
 ;; well known that the determined Real Programmer can write Forth in
 ;; any language.  This package is the logical conclusion.  Those who
 ;; know what is right and true are now liberated to program the One
 ;; True Editor in the One True Language.
-;;
+
 ;; "Party like it's " 1970 number-to-string concat "!" concat
 ;; M-x elforth-eval-region
-;;
+
 ;;; Code:
 
 (require 'cl-lib)
