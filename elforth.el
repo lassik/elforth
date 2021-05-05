@@ -29,10 +29,10 @@
 (defvar elforth-read-expression-history '()
   "History of El Forth expressions read from the minibuffer.")
 
-(defvar elforth-stack '()
+(defvar elforth--stack '()
   "Holds the El Forth data stack. First value is top of stack.")
 
-(defvar elforth-dictionary '()
+(defvar elforth--dictionary '()
   "Holds the definitions of El Forth words.
 
 A word is a 3-element list:
@@ -40,7 +40,7 @@ A word is a 3-element list:
 - list of iarg names as symbols
 - list of oarg names as symbols")
 
-(defvar elforth-variables '()
+(defvar elforth--variables '()
   "Values of the one-letter variables a..z for El Forth.")
 
 (defun elforth--show-list (interactive-p list repr)
@@ -58,7 +58,7 @@ A word is a 3-element list:
 (defun elforth-show-variables (interactive-p)
   "Show the contents of the El Forth variables a..z in the echo area."
   (interactive (list t))
-  (elforth--show-list interactive-p elforth-variables
+  (elforth--show-list interactive-p elforth--variables
                       (lambda (pair)
                         (let ((variable (car pair)) (value (cdr pair)))
                           (format "%S=%S" variable value)))))
@@ -66,27 +66,27 @@ A word is a 3-element list:
 (defun elforth-show-stack (interactive-p)
   "Show the contents of the El Forth stack in the echo area."
   (interactive (list t))
-  (elforth--show-list interactive-p (reverse elforth-stack)
+  (elforth--show-list interactive-p (reverse elforth--stack)
                       (lambda (obj) (format "%S" obj))))
 
 (defun elforth-clear-stack ()
   (interactive)
-  (setq elforth-stack '())
+  (setq elforth--stack '())
   (elforth-show-stack (called-interactively-p 'interactive)))
 
 (defun elforth-push (value)
-  (setq elforth-stack (cons value elforth-stack)))
+  (setq elforth--stack (cons value elforth--stack)))
 
 (defun elforth-push-many (values)
-  (setq elforth-stack (append (reverse values) elforth-stack)))
+  (setq elforth--stack (append (reverse values) elforth--stack)))
 
 (defun elforth-pop-many (n)
   (let ((n (max 0 n)))
-    (cond ((> n (length elforth-stack))
+    (cond ((> n (length elforth--stack))
            (error "The stack does not have %d values" n))
           (t
-           (let ((values (reverse (cl-subseq elforth-stack 0 n))))
-             (setq elforth-stack (cl-subseq elforth-stack n))
+           (let ((values (reverse (cl-subseq elforth--stack 0 n))))
+             (setq elforth--stack (cl-subseq elforth--stack n))
              values)))))
 
 (defun elforth--alist-upsert (alist name value)
@@ -104,7 +104,7 @@ A word is a 3-element list:
   (cond ((not (symbolp variable))
          (error "Trying to fetch non-symbol: %S" variable))
         ((elforth-only-variable-p variable)
-         (cdr (or (assq variable elforth-variables)
+         (cdr (or (assq variable elforth--variables)
                   (error "No such variable: %S" variable))))
         ((not (boundp variable))
          (error "No such variable: %S" variable))
@@ -113,15 +113,15 @@ A word is a 3-element list:
 
 (defun elforth-store (variable value)
   (if (elforth-only-variable-p variable)
-      (setq elforth-variables
-            (sort (elforth--alist-upsert elforth-variables variable value)
+      (setq elforth--variables
+            (sort (elforth--alist-upsert elforth--variables variable value)
                   (lambda (a b) (string< (car a) (car b)))))
     (setf (symbol-value variable) value))
   value)
 
 (defun elforth--resolve-function (func)
   (or (and (symbolp func)
-           (cdr (assq func elforth-dictionary)))
+           (cdr (assq func elforth--dictionary)))
       (and (functionp func)
            (let* ((arity (func-arity func))
                   (max-args (cdr arity)))
@@ -172,8 +172,8 @@ A word is a 3-element list:
 
 (defun elforth--define (name definition)
   (cl-assert (symbolp name))
-  (setq elforth-dictionary
-        (elforth--alist-upsert elforth-dictionary name definition))
+  (setq elforth--dictionary
+        (elforth--alist-upsert elforth--dictionary name definition))
   name)
 
 (defmacro define-elforth-word (name stack-effect &rest body)
