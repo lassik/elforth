@@ -249,6 +249,12 @@ the same name as a function without breaking the function."
 (define-elforth-word execute (func --)
   (elforth-execute func))
 
+(define-elforth-word 1call (func --)
+  (elforth-apply func (elforth-pop-many 1)))
+
+(define-elforth-word 2call (func --)
+  (elforth-apply func (elforth-pop-many 2)))
+
 (define-elforth-word @ (variable -- value)
   (setq value (elforth-fetch variable)))
 
@@ -260,6 +266,7 @@ the same name as a function without breaking the function."
 (define-elforth-word swap (a b -- b a))
 (define-elforth-word rot (x a b -- a b x))
 (define-elforth-word clear (--) (elforth-clear-stack))
+(define-elforth-word depth (-- n) (setq n (length elforth--stack)))
 (define-elforth-word 2list (-- list) (setq list (elforth-pop-many 2)))
 (define-elforth-word nlist (n -- list) (setq list (elforth-pop-many n)))
 (define-elforth-word unlist (list --) (elforth-push-many list))
