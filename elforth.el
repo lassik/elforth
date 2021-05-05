@@ -254,7 +254,7 @@ A word is a 3-element list:
              (unless (symbolp word)
                (error "Execution token is not a symbol: %S" word))
              (elforth-push word)))
-          ((symbolp word)
+          ((and (symbolp word) (not (elforth-only-variable-p word)))
            (elforth-execute word))
           (t
            (elforth-push word)))))
