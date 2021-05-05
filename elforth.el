@@ -43,9 +43,25 @@ A word is a 3-element list:
 (defvar elforth-variables '()
   "Values of the one-letter variables a..z for ElForth.")
 
+(defun elforth-show-stack (interactive-p)
+  "Show the contents of the ElForth stack in the echo area."
+  (interactive (list t))
+  (prog1 elforth-stack
+    (when interactive-p
+      (message "%s"
+               (if (null elforth-stack) "Empty"
+                 (with-temp-buffer
+                   (let ((obj (car elforth-stack)))
+                     (insert (format "%S" obj)))
+                   (dolist (obj (cdr elforth-stack))
+                     (goto-char (point-min))
+                     (insert (format "%S " obj)))
+                   (buffer-string)))))))
+
 (defun elforth-clear-stack ()
   (interactive)
-  (setq elforth-stack '()))
+  (setq elforth-stack '())
+  (elforth-show-stack (called-interactively-p 'interactive)))
 
 (defun elforth-push (value)
   (setq elforth-stack (cons value elforth-stack)))
@@ -238,21 +254,6 @@ A word is a 3-element list:
            (elforth-execute word))
           (t
            (elforth-push word)))))
-
-(defun elforth-show-stack (interactive-p)
-  "Show the contents of the ElForth stack in the echo area."
-  (interactive (list t))
-  (prog1 elforth-stack
-    (when interactive-p
-      (message "%s"
-               (if (null elforth-stack) "Empty"
-                 (with-temp-buffer
-                   (let ((obj (car elforth-stack)))
-                     (insert (format "%S" obj)))
-                   (dolist (obj (cdr elforth-stack))
-                     (goto-char (point-min))
-                     (insert (format "%S " obj)))
-                   (buffer-string)))))))
 
 (defun elforth-eval-string (string)
   "Read STRING as ElForth code and evaluate it."
