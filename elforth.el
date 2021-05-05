@@ -106,9 +106,10 @@ INTERACTIVE-P is non-nil when called interactively."
 
 (defun elforth--alist-upsert (alist name value)
   "Internal function to update or insert NAME and VALUE in ALIST."
-  (cons (cons name value)
-        (cl-remove-if (lambda (entry) (eq name (car entry)))
-                      alist)))
+  (sort (cons (cons name value)
+              (cl-remove-if (lambda (entry) (equal name (car entry)))
+                            alist))
+        (lambda (a b) (string< (car a) (car b)))))
 
 (defun elforth-only-variable-p (variable)
   "Return t if VARIABLE is one of the Forth-only variables a..z."
@@ -142,8 +143,7 @@ functions in separate namespaces, so you can set a variable with
 the same name as a function without breaking the function."
   (if (elforth-only-variable-p variable)
       (setq elforth--variables
-            (sort (elforth--alist-upsert elforth--variables variable value)
-                  (lambda (a b) (string< (car a) (car b)))))
+            (elforth--alist-upsert elforth--variables variable value))
     (setf (symbol-value variable) value))
   value)
 
