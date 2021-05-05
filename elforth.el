@@ -162,14 +162,14 @@ the same name as a function without breaking the function."
                     (error "Trying to apply special form: %S" func)))))
       (error "No such function: %S" func)))
 
-(defun elforth--rfunc-min-args (func)
+(defun elforth--rfunc-min-args (func zero-case)
   "Internal function to get info about resolved FUNC."
   (if (functionp func)
       (let* ((arity (func-arity func))
              (min-args (car arity))
              (max-args (cdr arity)))
         (if (and (= 0 min-args) (eq 'many max-args))
-            2
+            zero-case
           min-args))
     (let ((iargs (elt func 1)))
       (length iargs))))
@@ -191,7 +191,7 @@ the same name as a function without breaking the function."
   "Call the El Forth or Emacs Lisp function FUNC with ARGS."
   (let ((func (elforth--resolve-function func))
         (n (length args)))
-    (cond ((< n (elforth--rfunc-min-args func))
+    (cond ((< n (elforth--rfunc-min-args func 0))
            (error "Too few arguments"))
           ((elforth--rfunc-too-many-args-p func n)
            (error "Too many arguments"))
@@ -201,7 +201,7 @@ the same name as a function without breaking the function."
 (defun elforth-execute (func)
   "Call the El Forth or Emacs Lisp function FUNC with args from stack."
   (let* ((func (elforth--resolve-function func))
-         (args (elforth-pop-many (elforth--rfunc-min-args func))))
+         (args (elforth-pop-many (elforth--rfunc-min-args func 2))))
     (elforth-push-many (elforth--rfunc-apply func args))))
 
 (defun elforth--define (name definition)
