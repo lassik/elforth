@@ -196,6 +196,9 @@ A word is a 3-element list:
 (define-elforth-word swap (a b -- b a))
 (define-elforth-word rot (x a b -- a b x))
 (define-elforth-word clear (--) (elforth-clear-stack))
+(define-elforth-word 2list (-- list) (setq list (elforth-pop-many 2)))
+(define-elforth-word nlist (n -- list) (setq list (elforth-pop-many n)))
+(define-elforth-word unlist (list --) (elforth-push-many list))
 
 (defun elforth-read-from-string (string)
   "Read list of ElForth words from STRING."
