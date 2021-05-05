@@ -43,20 +43,27 @@ A word is a 3-element list:
 (defvar elforth-variables '()
   "Values of the one-letter variables a..z for ElForth.")
 
+(defun elforth--show-list (interactive-p list show)
+  (prog1 list
+    (when interactive-p
+      (message "%s"
+               (if (null list) "Empty"
+                 (with-temp-buffer
+                   (funcall show list)
+                   (buffer-string)))))))
+
 (defun elforth-show-stack (interactive-p)
   "Show the contents of the ElForth stack in the echo area."
   (interactive (list t))
-  (prog1 elforth-stack
-    (when interactive-p
-      (message "%s"
-               (if (null elforth-stack) "Empty"
-                 (with-temp-buffer
-                   (let ((obj (car elforth-stack)))
-                     (insert (format "%S" obj)))
-                   (dolist (obj (cdr elforth-stack))
-                     (goto-char (point-min))
-                     (insert (format "%S " obj)))
-                   (buffer-string)))))))
+  (elforth--show-list
+   interactive-p
+   elforth-stack
+   (lambda (stack)
+     (let ((obj (car stack)))
+       (insert (format "%S" obj)))
+     (dolist (obj (cdr stack))
+       (goto-char (point-min))
+       (insert (format "%S " obj))))))
 
 (defun elforth-clear-stack ()
   (interactive)
