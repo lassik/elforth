@@ -228,6 +228,11 @@ A word is a 3-element list:
 (define-elforth-word nlist (n -- list) (setq list (elforth-pop-many n)))
 (define-elforth-word unlist (list --) (elforth-push-many list))
 
+(define-elforth-word min (a b -- x) (setq x (min a b)))
+(define-elforth-word max (a b -- x) (setq x (max a b)))
+
+(define-elforth-word negate (a -- a) (setq a (- a)))
+
 (defun elforth-read-from-string (string)
   "Read list of El Forth words from STRING."
   (with-temp-buffer
