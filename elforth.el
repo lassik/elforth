@@ -163,7 +163,10 @@ the same name as a function without breaking the function."
       (error "No such function: %S" func)))
 
 (defun elforth--rfunc-min-args (func zero-case)
-  "Internal function to get info about resolved FUNC."
+  "Internal function to get number of required args for resolved FUNC.
+
+ZERO-CASE is the argument count to return for functions that take
+no required arguments and arbitrarily many optional arguments."
   (if (functionp func)
       (let* ((arity (func-arity func))
              (min-args (car arity))
