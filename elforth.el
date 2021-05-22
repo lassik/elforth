@@ -265,7 +265,7 @@ no required arguments and arbitrarily many optional arguments."
   (elforth-store variable value))
 
 (define-elforth-word dup (a -- a a))
-(define-elforth-word drop (_a --))
+(define-elforth-word drop (_ --))
 (define-elforth-word swap (a b -- b a))
 (define-elforth-word rot (x a b -- a b x))
 (define-elforth-word clear (--) (elforth-clear-stack))
