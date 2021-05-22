@@ -162,20 +162,27 @@ the same name as a function without breaking the function."
                     (error "Trying to apply special form: %S" func)))))
       (error "No such function: %S" func)))
 
-(defun elforth--rfunc-min-args (func zero-case)
-  "Internal function to get number of required args for resolved FUNC.
+(defun elforth--rfunc-min-arity (zero-case func)
+  "Internal function to get a minimum arity for resolved FUNC.
 
-ZERO-CASE is the argument count to return for functions that take
-no required arguments and arbitrarily many optional arguments."
+ZERO-CASE is the arity to return for functions that take no
+required arguments and arbitrarily many optional arguments."
   (if (functionp func)
       (let* ((arity (func-arity func))
              (min-args (car arity))
              (max-args (cdr arity)))
-        (if (and (= 0 min-args) (eq 'many max-args))
-            zero-case
-          min-args))
+        (if (and (= 0 min-args) (eq 'many max-args)) zero-case min-args))
     (let ((iargs (elt func 1)))
       (length iargs))))
+
+(defun elforth--rfunc-default-arity (func)
+  "Internal function to get default arity for resolved FUNC."
+  (or (and (functionp func) (get func 'elforth-arity))
+      (elforth--rfunc-min-arity 2 func)))
+
+(defun elforth--rfunc-too-few-args-p (func n)
+  "Internal function to check whether resolved FUNC can take N args."
+  (< n (elforth--rfunc-min-arity 0 func)))
 
 (defun elforth--rfunc-too-many-args-p (func n)
   "Internal function to check whether resolved FUNC can take N args."
@@ -194,7 +201,7 @@ no required arguments and arbitrarily many optional arguments."
   "Call the El Forth or Emacs Lisp function FUNC with ARGS."
   (let ((func (elforth--resolve-function func))
         (n (length args)))
-    (cond ((< n (elforth--rfunc-min-args func 0))
+    (cond ((elforth--rfunc-too-few-args-p func n)
            (error "Too few arguments"))
           ((elforth--rfunc-too-many-args-p func n)
            (error "Too many arguments"))
@@ -204,7 +211,7 @@ no required arguments and arbitrarily many optional arguments."
 (defun elforth-execute (func)
   "Call the El Forth or Emacs Lisp function FUNC with args from stack."
   (let* ((func (elforth--resolve-function func))
-         (args (elforth-pop-many (elforth--rfunc-min-args func 2))))
+         (args (elforth-pop-many (elforth--rfunc-default-arity func))))
     (elforth-push-many (elforth--rfunc-apply func args))))
 
 (defun elforth--define (name definition)
