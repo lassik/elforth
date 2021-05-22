@@ -184,19 +184,20 @@ the same name as a function without breaking the function."
 ;; always possible to circumvent it and pass the exact number of args
 ;; you prefer by using the `apply' family.
 
+(defun elforth--ordinary-function-p (func)
+  "Internal function to determine whether FUNC is ordinary."
+  (let ((max-args (cdr (func-arity func))))
+    (or (eq 'many max-args)
+        (and (integerp max-args) (>= max-args 0)))))
+
 (defun elforth--resolve-function (func)
   "Internal function to validate FUNC and resolve into a normal form."
   (or (and (symbolp func)
            (cdr (assq func elforth--dictionary)))
       (and (functionp func)
-           (let* ((arity (func-arity func))
-                  (max-args (cdr arity)))
-             (cond ((eq 'many max-args)
-                    func)
-                   ((and (integerp max-args) (>= max-args 0))
-                    func)
-                   (t
-                    (error "Trying to apply special form: %S" func)))))
+           (if (elforth--ordinary-function-p func)
+               func
+             (error "Trying to apply special form: %S" func)))
       (error "No such function: %S" func)))
 
 (defun elforth--rfunc-min-arity (zero-case func)
