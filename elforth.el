@@ -147,6 +147,39 @@ the same name as a function without breaking the function."
     (setf (symbol-value variable) value))
   value)
 
+;; Lisp functions can have optional arguments. Additionally, they can
+;; have a rest argument that rolls any number of remaining args into
+;; one list.
+
+;; A Forth word should ideally always consume the same number of items
+;; from the stack. The question arises of how to fit variable-arity
+;; Lisp words into this Forth mindset.
+
+;; Our solution is twofold:
+
+;; - The `apply' word family takes a set number of items from the
+;;   stack (or one item, which is a list) and calls a Lisp function
+;;   with them.
+
+;; - Calling a word directly without using `apply' will determine a
+;;   default arity for that word, and will take that many items from
+;;   the stack and use them as the arguments.
+
+;; The default arity is the number of required arguments taken by the
+;; Lisp function. In other words, without optional and rest args.
+
+;; However, some functions have only a rest argument and no required
+;; arguments. Good examples are `+' and `concat'. These are almost
+;; useless to call with no arguments, so we use a default arity of 2.
+;; That matches our intuition about infix operators from math class,
+;; and also the arity of the corresponding ANS Forth words.
+
+;; Some Lisp functions are more intuitive or useful when optional args
+;; are supplied, than when they are not. A good example is
+;; `substring': (substring "hello" 1 3) is more intuitive and useful
+;; than (substring "hello"). We let (put 'substring 'elforth-arity 3)
+;; specify a default arity for such functions on a case-by-case basis.
+
 (defun elforth--resolve-function (func)
   "Internal function to validate FUNC and resolve into a normal form."
   (or (and (symbolp func)
