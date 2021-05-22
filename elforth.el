@@ -249,8 +249,17 @@ no required arguments and arbitrarily many optional arguments."
 (define-elforth-word apply (list func --)
   (elforth-apply func list))
 
-(define-elforth-word execute (func --)
-  (elforth-execute func))
+(define-elforth-word 1apply (func --)
+  (elforth-apply func (elforth-pop-many 1)))
+
+(define-elforth-word 2apply (func --)
+  (elforth-apply func (elforth-pop-many 2)))
+
+(define-elforth-word 3apply (func --)
+  (elforth-apply func (elforth-pop-many 3)))
+
+(define-elforth-word napply (func n --)
+  (elforth-apply func (elforth-pop-many n)))
 
 (define-elforth-word 1call (func --)
   (elforth-apply func (elforth-pop-many 1)))
