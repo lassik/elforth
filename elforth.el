@@ -180,6 +180,10 @@ the same name as a function without breaking the function."
 ;; than (substring "hello"). We let (put 'substring 'elforth-arity 3)
 ;; specify a default arity for such functions on a case-by-case basis.
 
+;; Remember that when the default arity does not serve your need, it's
+;; always possible to circumvent it and pass the exact number of args
+;; you prefer by using the `apply' family.
+
 (defun elforth--resolve-function (func)
   "Internal function to validate FUNC and resolve into a normal form."
   (or (and (symbolp func)
