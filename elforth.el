@@ -179,9 +179,9 @@ no required arguments and arbitrarily many optional arguments."
 
 (defun elforth--rfunc-too-many-args-p (func n)
   "Internal function to check whether resolved FUNC can take N args."
-  (if (functionp func)
-      (let ((max-args (cdr (func-arity func))))
-        (and (integerp max-args) (> n max-args)))))
+  (and (functionp func)
+       (let ((max-args (cdr (func-arity func))))
+         (and (integerp max-args) (> n max-args)))))
 
 (defun elforth--rfunc-apply (func args)
   "Internal function to apply resolved FUNC to ARGS."
