@@ -296,6 +296,9 @@ required arguments and arbitrarily many optional arguments."
 
 (define-elforth-word negate (a -- a) (setq a (- a)))
 
+(put 'subseq 'elforth-arity 3)
+(put 'substring 'elforth-arity 3)
+
 (defun elforth-read-from-string (string)
   "Read list of El Forth words from STRING."
   (with-temp-buffer
